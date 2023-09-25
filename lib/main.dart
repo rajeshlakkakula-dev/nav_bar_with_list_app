@@ -20,6 +20,7 @@ class BottomNavBarApp extends StatefulWidget {
 
 class _BottomNavBarAppState extends State<BottomNavBarApp> {
   int _selectedIndex = 0;
+  final ScrollController _homeController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -27,17 +28,29 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
       appBar: AppBar(
         title: Text('Nav Bar App'),
       ),
-      body:  _listViewBody(),
+      body: _listViewBody(),
       bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.airplay_rounded), label: 'Dailog'),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+          items: [
+            BottomNavigationBarItem(
+                icon: Icon(Icons.home_outlined), label: 'Home'),
+            BottomNavigationBarItem(
+                icon: Icon(Icons.airplay_rounded), label: 'Dailog'),
+          ],
+          currentIndex: _selectedIndex,
+          onTap: (index) {
+            switch (index) {
+              case 0: // only scroll to top when current index is selected
+                if (_selectedIndex == index) {
+                  _homeController.animateTo(0.0,
+                      duration: Duration(milliseconds: 500),
+                      curve: Curves.easeOut);
+                }
+                break;
+              case 1:
+                showModal(context);
+            }
+            _onItemTapped;
+          }),
     );
   }
 
@@ -48,14 +61,31 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
   }
 
   Widget _listViewBody() {
-     return ListView.separated(
-         itemBuilder: (BuildContext context,int index){
-           return Center(
-             child: Text('Item $index'),
-           );
-         },
-         separatorBuilder: (BuildContext context, int index) => Divider( thickness: 1,) ,
-         itemCount: 50
-     );
+    return ListView.separated(
+       controller: _homeController,
+        itemBuilder: (BuildContext context, int index) {
+          return Center(
+            child: Text('Item $index'),
+          );
+        },
+        separatorBuilder: (BuildContext context, int index) => Divider(
+              thickness: 1,
+            ),
+        itemCount: 100);
+  }
+
+  void showModal(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+              content: Text('Sample Dailog'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('close'))
+              ],
+            ));
   }
 }
